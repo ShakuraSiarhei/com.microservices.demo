@@ -1,22 +1,19 @@
 package com.microservices.demo.twitter.to.kafka.service.runner.impl;
 
-import com.microservices.demo.twitter.to.kafka.service.config.TwitterToKafkaServiceConfigData;
+import com.microservices.demo.config.TwitterToKafkaServiceConfigData;
 import com.microservices.demo.twitter.to.kafka.service.listener.TwitterKafkaStatusListener;
 import com.microservices.demo.twitter.to.kafka.service.runner.StreamRunner;
 import java.util.Arrays;
 import java.util.Objects;
 import javax.annotation.PreDestroy;
-import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import twitter4j.FilterQuery;
-import twitter4j.TwitterException;
 import twitter4j.TwitterStream;
 import twitter4j.TwitterStreamFactory;
 
-@AllArgsConstructor
 @Component
 @ConditionalOnProperty(name = "twitter-to-kafka-service.enable-mock-tweets", havingValue = "false", matchIfMissing = true)
 public class TwitterKafkaStreamRunner implements StreamRunner {
@@ -26,15 +23,21 @@ public class TwitterKafkaStreamRunner implements StreamRunner {
   private final TwitterKafkaStatusListener twitterKafkaStatusListener;
   private TwitterStream twitterStream;
 
+  public TwitterKafkaStreamRunner(TwitterToKafkaServiceConfigData twitterToKafkaServiceConfigData,
+      TwitterKafkaStatusListener twitterKafkaStatusListener) {
+    this.twitterToKafkaServiceConfigData = twitterToKafkaServiceConfigData;
+    this.twitterKafkaStatusListener = twitterKafkaStatusListener;
+  }
+
   @Override
-  public void start() throws TwitterException {
+  public void start() {
     twitterStream = new TwitterStreamFactory().getInstance();
     twitterStream.addListener(twitterKafkaStatusListener);
     addFilter();
   }
 
   @PreDestroy
-  public void shutDown(){
+  public void shutDown() {
     if (Objects.nonNull(twitterStream)) {
       LOG.info("Closing twitter stream");
       twitterStream.shutdown();

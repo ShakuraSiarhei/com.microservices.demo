@@ -1,6 +1,6 @@
 package com.microservices.demo.twitter.to.kafka.service.runner.impl;
 
-import com.microservices.demo.twitter.to.kafka.service.config.TwitterToKafkaServiceConfigData;
+import com.microservices.demo.config.TwitterToKafkaServiceConfigData;
 import com.microservices.demo.twitter.to.kafka.service.exception.TwitterToKafkaServiceException;
 import com.microservices.demo.twitter.to.kafka.service.listener.TwitterKafkaStatusListener;
 import com.microservices.demo.twitter.to.kafka.service.runner.StreamRunner;
@@ -11,7 +11,6 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
-import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -20,7 +19,6 @@ import twitter4j.Status;
 import twitter4j.TwitterException;
 import twitter4j.TwitterObjectFactory;
 
-@AllArgsConstructor
 @Component
 @ConditionalOnProperty(name = "twitter-to-kafka-service.enable-mock-tweets", havingValue = "true")
 public class MockKafkaStreamRunner implements StreamRunner {
@@ -61,6 +59,12 @@ public class MockKafkaStreamRunner implements StreamRunner {
   private final TwitterToKafkaServiceConfigData twitterToKafkaServiceConfigData;
   private final TwitterKafkaStatusListener twitterKafkaStatusListener;
 
+  public MockKafkaStreamRunner(TwitterToKafkaServiceConfigData twitterToKafkaServiceConfigData,
+      TwitterKafkaStatusListener twitterKafkaStatusListener) {
+    this.twitterToKafkaServiceConfigData = twitterToKafkaServiceConfigData;
+    this.twitterKafkaStatusListener = twitterKafkaStatusListener;
+  }
+
   private static String formatTweetAsJsonWithParams(String[] params) {
     String tweet = tweetAsRawJson;
 
@@ -82,7 +86,7 @@ public class MockKafkaStreamRunner implements StreamRunner {
   }
 
   @Override
-  public void start() throws TwitterException {
+  public void start() {
     String[] keywords = twitterToKafkaServiceConfigData.getTwitterKeywords().toArray(new String[0]);
     int minTweetLength = twitterToKafkaServiceConfigData.getMockMinTweetLength();
     int maxTweetLength = twitterToKafkaServiceConfigData.getMockMaxTweetLength();
